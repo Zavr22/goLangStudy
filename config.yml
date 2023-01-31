@@ -9,5 +9,5 @@ storage :
   host: localhost
   port: 5432
   database: postgres
-  username: apple
-  password: Rekbr345
+  username: postgres
+  password: root
