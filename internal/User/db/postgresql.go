@@ -1,4 +1,4 @@
-package db
+package User
 
 import (
 	"context"
@@ -19,9 +19,9 @@ func formatQuery(query string) string {
 	return strings.ReplaceAll(strings.ReplaceAll(query, "\t", ""), "\n", "")
 }
 
-func (r *Repository) CreateUser(ctx context.Context, user User.User) (string, error) {
+func (r *Repository) CreateUser(ctx context.Context, user User.User) error {
 	query := `
-				INSERT INTO "user"
+				INSERT INTO USER
 				( name, surname, password, role)
 				VALUES ($1, $2, $3, $4)
 				RETURNING id
@@ -31,21 +31,58 @@ func (r *Repository) CreateUser(ctx context.Context, user User.User) (string, er
 		if pgErr, ok := err.(*pgconn.PgError); ok {
 			newError := fmt.Sprintf(" Sql Error: %s, Detail: %s, Where : %s, Code: %s", pgErr.Message, pgErr.Detail, pgErr.Where, pgErr.Code, pgErr.SQLState())
 			fmt.Println(newError)
-			return "", nil
+			return nil
 		}
-		return "", err
+		return err
 	}
-	return "", nil
+	return nil
 }
 
 func (r *Repository) FindAll(ctx context.Context) (u []User.User, err error) {
-	//TODO implement me
-	panic("implement me")
+	query := `
+		SELECT USER.id, USER.name, USER.surname FROM PUBLIC.USER;
+		`
+	rows, err := r.client.Query(ctx, query)
+
+	if err != nil {
+		return nil, err
+	}
+	users := make([]User.User, 0)
+
+	for rows.Next() {
+		var usr User.User
+
+		err = rows.Scan(
+			&usr.Id,
+			&usr.Name,
+			&usr.Surname,
+		)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, usr)
+
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return users, nil
 }
 
 func (r *Repository) FindOne(ctx context.Context) (User.User, error) {
-	//TODO implement me
-	panic("implement me")
+
+	query := `SELECT USER.ID, USER.NAME, USER.SURNAME FROM PUBLIC.USER WHERE USER.ID= $1`
+
+	r.logger.Println(fmt.Sprintf("Sql query: %s", formatQuery(query)))
+
+	var usr User.User
+	err := r.client.QueryRow(ctx, query, usr.Id).Scan(&usr.Id, &usr.Name, &usr.Surname)
+
+	if err != nil {
+		return User.User{}, err
+	}
+
+	return usr, nil
 }
 
 func (r *Repository) Update(ctx context.Context, user User.User) error {
@@ -58,9 +95,8 @@ func (r *Repository) Delete(ctx context.Context, id string) error {
 	panic("implement me")
 }
 
-func NewRepository(client postgresql.Client, logger *log.Logger) User.Storage {
+func NewRepository(client postgresql.Client) *Repository {
 	return &Repository{
 		client: client,
-		logger: logger,
 	}
 }

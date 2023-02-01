@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/Zavr22/goLangStudy/cmd/pkg/utills"
+
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4"
 	_ "github.com/jackc/pgx/v4"
@@ -19,9 +20,9 @@ type Client interface {
 	Begin(ctx context.Context) (pgx.Tx, error)
 }
 
-func NewClient(ctx context.Context, maxAttempts int, username, password, host, post, database string) (con *pgxpool.Pool, err error) {
+func NewClient(ctx context.Context, maxAttempts int, username, password, host, port, database string) (con *pgxpool.Pool, err error) {
 
-	dsn := fmt.Sprintf("postgresql//%s:%s@%s:%s/%s", username, password, host, post, database)
+	dsn := fmt.Sprintf("postgresql//%s:%s@%s:%s/%s", username, password, host, port, database)
 	err = repeatable.DoWithTries(func() error {
 		ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 		defer cancel()
@@ -31,11 +32,11 @@ func NewClient(ctx context.Context, maxAttempts int, username, password, host, p
 			return err
 		}
 		return nil
-	}, maxAttempts, 5*time.Second)
+	}, maxAttempts, 3*time.Second)
 
 	if err != nil {
 
-		log.Fatal("error ")
+		log.Fatal("error while connect")
 	}
 
 	return con, nil

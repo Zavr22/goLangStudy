@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DdlMappings">
+    <mapping uuid="5db1ff4a-07fa-4116-8737-2511952319f3" name="postgres/apple@localhost Mapping">
+      <data-sources db="19414b22-7a78-41c0-8cb4-bb1e8149a133" />
+      <scope>
+        <node kind="database" qname="postgres" />
+      </scope>
+    </mapping>
+  </component>
+</project>
