@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/Zavr22/goLangStudy/cmd/pkg/postgresql"
-	"github.com/Zavr22/goLangStudy/internal/User"
+	user "github.com/Zavr22/goLangStudy/internal/User"
 	"github.com/jackc/pgconn"
 	"log"
 	"strings"
@@ -19,14 +19,14 @@ func formatQuery(query string) string {
 	return strings.ReplaceAll(strings.ReplaceAll(query, "\t", ""), "\n", "")
 }
 
-func (r *Repository) CreateUser(ctx context.Context, user User.User) error {
+func (r *Repository) CreateUser(ctx context.Context, user user.User) error {
 	query := `
-				INSERT INTO USER
+				INSERT INTO PUBLIC."user"
 				( name, surname, password, role)
 				VALUES ($1, $2, $3, $4)
 				RETURNING id
 	`
-	r.logger.Println(fmt.Sprintf("Sql query: %s", formatQuery(query)))
+	//r.logger.Println(fmt.Sprintf("Sql query: %s", formatQuery(query)))
 	if err := r.client.QueryRow(ctx, query, user.Name, user.Surname, user.Password, user.Role).Scan(&user.Id); err != nil {
 		if pgErr, ok := err.(*pgconn.PgError); ok {
 			newError := fmt.Sprintf(" Sql Error: %s, Detail: %s, Where : %s, Code: %s", pgErr.Message, pgErr.Detail, pgErr.Where, pgErr.Code, pgErr.SQLState())
@@ -38,7 +38,7 @@ func (r *Repository) CreateUser(ctx context.Context, user User.User) error {
 	return nil
 }
 
-func (r *Repository) FindAll(ctx context.Context) (u []User.User, err error) {
+func (r *Repository) FindAll(ctx context.Context) (u []user.User, err error) {
 	query := `
 		SELECT USER.id, USER.name, USER.surname FROM PUBLIC.USER;
 		`
@@ -47,10 +47,10 @@ func (r *Repository) FindAll(ctx context.Context) (u []User.User, err error) {
 	if err != nil {
 		return nil, err
 	}
-	users := make([]User.User, 0)
+	users := make([]user.User, 0)
 
 	for rows.Next() {
-		var usr User.User
+		var usr user.User
 
 		err = rows.Scan(
 			&usr.Id,
@@ -69,23 +69,23 @@ func (r *Repository) FindAll(ctx context.Context) (u []User.User, err error) {
 	return users, nil
 }
 
-func (r *Repository) FindOne(ctx context.Context) (User.User, error) {
+func (r *Repository) FindOne(ctx context.Context) (user.User, error) {
 
-	query := `SELECT USER.ID, USER.NAME, USER.SURNAME FROM PUBLIC.USER WHERE USER.ID= $1`
+	query := `SELECT USER.ID, USER.NAME, USER.SURNAME FROM PUBLIC.USER WHERE USER.name= $1`
 
 	r.logger.Println(fmt.Sprintf("Sql query: %s", formatQuery(query)))
 
-	var usr User.User
+	var usr user.User
 	err := r.client.QueryRow(ctx, query, usr.Id).Scan(&usr.Id, &usr.Name, &usr.Surname)
 
 	if err != nil {
-		return User.User{}, err
+		return user.User{}, err
 	}
 
 	return usr, nil
 }
 
-func (r *Repository) Update(ctx context.Context, user User.User) error {
+func (r *Repository) Update(ctx context.Context, user user.User) error {
 	//TODO implement me
 	panic("implement me")
 }
