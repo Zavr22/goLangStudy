@@ -27,7 +27,7 @@ func (r *Repository) CreateUser(ctx context.Context, user user.User) error {
 				RETURNING id
 	`
 	//r.logger.Println(fmt.Sprintf("Sql query: %s", formatQuery(query)))
-	if err := r.client.QueryRow(ctx, query, user.Name, user.Surname, user.Password, user.Role).Scan(&user.Id); err != nil {
+	if err := r.client.QueryRow(query).Scan(&user.Id); err != nil {
 		if pgErr, ok := err.(*pgconn.PgError); ok {
 			newError := fmt.Sprintf(" Sql Error: %s, Detail: %s, Where : %s, Code: %s", pgErr.Message, pgErr.Detail, pgErr.Where, pgErr.Code, pgErr.SQLState())
 			fmt.Println(newError)
@@ -42,7 +42,7 @@ func (r *Repository) FindAll(ctx context.Context) (u []user.User, err error) {
 	query := `
 		SELECT USER.id, USER.name, USER.surname FROM PUBLIC.USER;
 		`
-	rows, err := r.client.Query(ctx, query)
+	rows, err := r.client.Query(query)
 
 	if err != nil {
 		return nil, err
@@ -76,7 +76,7 @@ func (r *Repository) FindOne(ctx context.Context) (user.User, error) {
 	r.logger.Println(fmt.Sprintf("Sql query: %s", formatQuery(query)))
 
 	var usr user.User
-	err := r.client.QueryRow(ctx, query, usr.Id).Scan(&usr.Id, &usr.Name, &usr.Surname)
+	err := r.client.QueryRow(query).Scan(&usr.Id, &usr.Name, &usr.Surname)
 
 	if err != nil {
 		return user.User{}, err

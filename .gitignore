@@ -1,3 +1,4 @@
 .vscode
 .idea
 /cmd/ui/node_modules/
+/cmd/ui/package-lock.json
