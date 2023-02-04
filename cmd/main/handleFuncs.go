@@ -3,13 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/Zavr22/goLangStudy/cmd/pkg/postgresql"
+	"github.com/Zavr22/goLangStudy/internal/User"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
 )
 
-func login(c *gin.Context, ctx *context.Context) {
+func login(c *gin.Context, q User.Storage) {
 	type user struct {
 		Name     string `json:"name" `
 		Password string `json:"password" `
@@ -21,13 +21,13 @@ func login(c *gin.Context, ctx *context.Context) {
 	}
 	var i bool
 	data1, _ := c.GetPostForm("name")
-	var data2 string
-	rows, err := postgresql.Client.Query(ctx, `select USER.NAME FROM PUBLI.USER WHERE USER.NAME = $1`, data1)
+	var data2 User.User
+	data2, err := q.FindOne(context.Background(), data1)
 	if err != nil {
 		log.Fatal("error")
 	}
-	data2 = rows
-	if data1 == data2 {
+
+	if data1 == data2.Name {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    http.StatusOK,
 			"message": "ok", // cast it to string before showing

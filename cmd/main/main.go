@@ -24,7 +24,7 @@ func main() {
 	router := gin.New()
 	auth := router.Group("/auth")
 	{
-		auth.POST("/addUser", login)
+		auth.POST("/addUser", )
 	}
 
 	/*newUser := User2.User{

@@ -6,12 +6,14 @@ import (
 	"github.com/Zavr22/goLangStudy/cmd/pkg/postgresql"
 	user "github.com/Zavr22/goLangStudy/internal/User"
 	"github.com/jackc/pgconn"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"log"
 	"strings"
 )
 
 type Repository struct {
-	client postgresql.Client
+	//client postgresql.Client
+	client *pgxpool.Pool
 	logger *log.Logger
 }
 
@@ -27,7 +29,7 @@ func (r *Repository) CreateUser(ctx context.Context, user user.User) error {
 				RETURNING id
 	`
 	//r.logger.Println(fmt.Sprintf("Sql query: %s", formatQuery(query)))
-	if err := r.client.QueryRow(query).Scan(&user.Id); err != nil {
+	if err := r.client.QueryRow(ctx, query).Scan(&user.Id); err != nil {
 		if pgErr, ok := err.(*pgconn.PgError); ok {
 			newError := fmt.Sprintf(" Sql Error: %s, Detail: %s, Where : %s, Code: %s", pgErr.Message, pgErr.Detail, pgErr.Where, pgErr.Code, pgErr.SQLState())
 			fmt.Println(newError)
@@ -42,7 +44,7 @@ func (r *Repository) FindAll(ctx context.Context) (u []user.User, err error) {
 	query := `
 		SELECT USER.id, USER.name, USER.surname FROM PUBLIC.USER;
 		`
-	rows, err := r.client.Query(query)
+	rows, err := r.client.Query(ctx, query)
 
 	if err != nil {
 		return nil, err
@@ -69,14 +71,14 @@ func (r *Repository) FindAll(ctx context.Context) (u []user.User, err error) {
 	return users, nil
 }
 
-func (r *Repository) FindOne(ctx context.Context) (user.User, error) {
+func (r *Repository) FindOne(ctx context.Context, dataname string) (user.User, error) {
 
-	query := `SELECT USER.ID, USER.NAME, USER.SURNAME FROM PUBLIC.USER WHERE USER.name= $1`
+	query := `SELECT  USER.NAME FROM PUBLIC.USER WHERE USER.name= $1`
 
 	r.logger.Println(fmt.Sprintf("Sql query: %s", formatQuery(query)))
 
 	var usr user.User
-	err := r.client.QueryRow(query).Scan(&usr.Id, &usr.Name, &usr.Surname)
+	err := r.client.QueryRow(ctx, query, dataname).Scan(&usr.Id, &usr.Name, &usr.Surname)
 
 	if err != nil {
 		return user.User{}, err

@@ -15,8 +15,8 @@ import (
 
 type Client interface {
 	Exec(sql string, arguments ...interface{}) pgconn.CommandTag
-	Query(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error)
-	QueryRow(sql string, arguments ...interface{}) (pgx.Row, error)
+	Query(sql string, args ...interface{}) (pgx.Rows, error)
+	QueryRow(ctx context.Context, sql string, arguments ...interface{}) (pgx.Row, error)
 	Begin(ctx context.Context) (pgx.Tx, error)
 }
 
