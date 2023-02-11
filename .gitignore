@@ -1,4 +1,3 @@
 .vscode
 .idea
-/ui/node_modules/
-/ui/package-lock.json
+.env
