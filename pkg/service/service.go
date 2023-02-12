@@ -1,8 +1,12 @@
 package service
 
-import "github.com/Zavr22/goLangStudy/pkg/repository"
+import (
+	goProj "github.com/Zavr22/goLangStudy"
+	"github.com/Zavr22/goLangStudy/pkg/repository"
+)
 
 type Authorization interface {
+	CreateUser(user goProj.User) (int, error)
 }
 
 type ToDoList interface {
@@ -18,5 +22,7 @@ type Service struct {
 }
 
 func NewService(repos *repository.Repository) *Service {
-	return &Service{}
+	return &Service{
+		Authorization: NewAuthService(repos.Authorization),
+	}
 }
