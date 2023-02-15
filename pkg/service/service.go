@@ -12,6 +12,7 @@ type Authorization interface {
 }
 
 type ToDoList interface {
+	Create(userId int, list goProj.ToDoList) (int, error)
 }
 
 type ToDoItem interface {
@@ -26,5 +27,6 @@ type Service struct {
 func NewService(repos *repository.Repository) *Service {
 	return &Service{
 		Authorization: NewAuthService(repos.Authorization),
+		ToDoList:      NewToDoListService(repos.ToDoList),
 	}
 }

@@ -1,5 +1,3 @@
-
-
 CREATE TABLE users
 (
     id            serial       not null unique,
