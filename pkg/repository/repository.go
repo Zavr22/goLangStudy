@@ -12,6 +12,10 @@ type Authorization interface {
 
 type ToDoList interface {
 	Create(userId int, list goProj.ToDoList) (int, error)
+	GetAll(userId int) ([]goProj.ToDoList, error)
+	GetById(userId int, listId int) (goProj.ToDoList, error)
+	Delete(userId int, listId int) error
+	Update(userId, listId int, input goProj.UpdateListInput) error
 }
 
 type ToDoItem interface {
